@@ -1,6 +1,6 @@
 ---
-title: "Highly Efficient Clinial Trial simulator - HECT"
-author: "MTEK Sciences\n"
+title: "Orville: A Bayesian Adaptive Clinial Trial Simulator"
+author: "SG\n"
 output:
   html_document: default
   pdf_document: default
@@ -116,13 +116,6 @@ To allow for further in-depth exploration of the behaviour under any given trial
 **Secondary analysis:** If secondary outcomes are set to be monitored by the user, this tab will produce a graph of data over time similar to the one in the ‘Data’ tab as well as point estimates and 95% credible intervals similar to those in the ‘Estimates’ tab.
 
 
-#### Technical details
-
-The full technical details are available in the appendix. 
-
-
-####Acknowledgements
-The development of this application was funded by the Bill & Melinda Gates Foundation.
 
 ______________________________________________________________________________________________________
 ## Appendix -- Technical reference
@@ -215,23 +208,25 @@ $$\hat{E}(SS) = \sum_{m = 1}^M(n_{\max} - n_T^m).$$
 **Type I error rate:** The type I error rate is defined as the probability of concluding that one of the treatments is superior under the assumption that none of the treatments are effective. Type I error rate is estimated as,
 $$\hat{P}\left(\exists l\hskip5pt \text{s.t.}\hskip5pt P\left(\theta_{l}= \max(\theta_1, \ldots, \theta_L) \right)>U \mid \theta_l = 0\hskip5pt \forall l\right) = \frac{1}{M}\sum_{m = 1}^{M}\mathbf{1}\left(\exists l\hskip5pt \text{s.t.}\hskip5pt P\left(\theta_{l}= \max(\theta_1, \ldots, \theta_L) \right)>U \mid \theta_l = 0\hskip5pt \forall l\right).$$  
 
-### Sample Size Calculation
-In the `Sample Size Calculation` tab, per-arm and total sample sizes can be calculated for a conventional multi-arm RCT. The goal is to obtain the required sample size to estimate the difference between the largest and second largest of the effects for a given statistical power, type I error rate, and drop-out rate. The rational is that in a multi-arm trial, the trial needs to be powered to detect the smallest difference between the largest of the effects and the rest.
+<!-- ### Sample Size Calculation -->
+<!-- In the `Sample Size Calculation` tab, per-arm and total sample sizes can be calculated for a conventional multi-arm RCT. The goal is to obtain the required sample size to estimate the difference between the largest and second largest of the effects for a given statistical power, type I error rate, and drop-out rate. The rational is that in a multi-arm trial, the trial needs to be powered to detect the smallest difference between the largest of the effects and the rest. -->
 
-If the continuous response type is selected, variances need to be provided. The sample size (per arm) is then given by 
-$$n_a = \left\lceil\frac{(\sigma^2_1 + \sigma^2_2)(Z_{1-\alpha/2}+Z_{1-\beta})^2}{\delta^2(1-r)} \right\rceil $$
-where $\delta$ is the difference between the largest effect size and the second largest effect size, $\sigma^2_1$ and $\sigma^2_2$ are the corresponding variances, $\alpha$ is the type I error rate and $\beta$ is $(1-\text{power})$, and $r$ is the dropout rate. 
+<!-- If the continuous response type is selected, variances need to be provided. The sample size (per arm) is then given by  -->
+<!-- $$n_a = \left\lceil\frac{(\sigma^2_1 + \sigma^2_2)(Z_{1-\alpha/2}+Z_{1-\beta})^2}{\delta^2(1-r)} \right\rceil $$ -->
+<!-- where $\delta$ is the difference between the largest effect size and the second largest effect size, $\sigma^2_1$ and $\sigma^2_2$ are the corresponding variances, $\alpha$ is the type I error rate and $\beta$ is $(1-\text{power})$, and $r$ is the dropout rate.  -->
 
-If the proportion response type is selected, the sample size (per arm) is given by 
-$$n_a = \left\lceil\frac{(p_1(1-p_1) + p_2(1-p_2))(Z_{1-\alpha/2}+Z_{1-\beta})^2}{(p_1 - p_2)^2(1-r)} \right\rceil $$
-where $p_1$ and $p_2$ are the probabilities of success for the best and second best treatments.
+<!-- If the proportion response type is selected, the sample size (per arm) is given by  -->
+<!-- $$n_a = \left\lceil\frac{(p_1(1-p_1) + p_2(1-p_2))(Z_{1-\alpha/2}+Z_{1-\beta})^2}{(p_1 - p_2)^2(1-r)} \right\rceil $$ -->
+<!-- where $p_1$ and $p_2$ are the probabilities of success for the best and second best treatments. -->
 
-The total sample size is simply calculated by multiplying the per-arm sample size by the number of trial arms.
+<!-- The total sample size is simply calculated by multiplying the per-arm sample size by the number of trial arms. -->
 
-####Acknowledgements
+**Acknowledgements**
+
 The development of this application was funded by the Bill & Melinda Gates Foundation.
 
-#####References
+**References**
+
 <script type="text/x-mathjax-config">
    MathJax.Hub.Config({  "HTML-CSS": { minScaleAdjust: 125, availableFonts: [] }  });
 </script>

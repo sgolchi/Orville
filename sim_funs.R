@@ -378,6 +378,8 @@ con_sup_check = function(theta) {
 #' @param compCon logical, compare all arms with control (first arm)
 #' @param adapt logical, adapt randomization probabilities, used only when \code{compCon = F}
 #' @param platf logical, use a platform design, i.e., add the last arm only when at least one arm is dropped
+#' @param fixed logical; needed only if \code{platf = T}; if true the last time is added at a certain interim look
+#' @param addlast scalar; needed only if \code{fixed = T}; the interim look at which the last arm is to be added
 #' @param MID minimally important difference for futility test of paiwise comparisons with control; used only when \code{compCon = T}
 #' @return updated posterior samples
 #'
@@ -385,14 +387,15 @@ con_sup_check = function(theta) {
 
 RAR_sim = function(nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000, upper = 0.975, uppfut = 0.95, lower = .01,
                    burn = 10*nt, response.type, conjugate_prior = T, padhere = rep(1,nt), adapt = T,
-                   platf = T, compCon = F, MID = 0) {
+                   platf = T, fixed = F, addlast = Inf, compCon = F, MID = 0) {
   if (good.out == F) {
     if (response.type == 'absolute') theta0 = - theta0
     if (response.type == 'rate') theta0 = 1 - theta0
   }
   ng = nb
   addarmlater = rep(0, nt)
-  if (platf == T) addarmlater[nt] = Inf
+  if (platf == T) 
+    if (fixed == T) addarmlater[nt] = addlast else addarmlater[nt] = Inf
   j = 0
   x = array(0, dim = c(nt, 1))
   x0 = array(0, dim = c(nt, 1))
@@ -484,7 +487,7 @@ RAR_sim = function(nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000, upper
         fut.stop = c(fut.stop, ll[addarmlater[ll]<j])
       }
       
-      if (platf == T & addarmlater[nt] == Inf) {
+      if (platf == T & fixed == F & addarmlater[nt] == Inf) {
         if (max(psup[,j+1]) > upper) {
           s = which.max(psup[,j+1])
           addarmlater[nt] = j
@@ -528,12 +531,12 @@ RAR_sim = function(nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000, upper
         fut.stop = c(fut.stop, ff[addarmlater[ff]<j])
         
       }
-      if (platf == T & addarmlater[nt] == Inf) {
+      if (platf == T & fixed == F & addarmlater[nt] == Inf) {
         
-          if (!is.null(fut.stop)) {
-            psup[fut.stop,j+1] = 0
-            addarmlater[nt] = j
-            }
+        if (!is.null(fut.stop)) {
+          psup[fut.stop,j+1] = 0
+          addarmlater[nt] = j
+        }
       }
       psup_out[,1] = c(0,rep(1/(nt0-1), (nt - 1)))
       psup_out[which(addarmlater>0),1] = 0
@@ -543,10 +546,10 @@ RAR_sim = function(nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000, upper
       prand[which(addarmlater<=j & psup[,j+1]>0)]  = 1
       prand[1] = 1
       prand[which(addarmlater==j)] = 1
-      prand[which(pfut > uppfut)] = 0
+      if (length(y)>=burn) prand[which(pfut > uppfut)] = 0
     }
     condition_A = (platf == F | j>addarmlater[nt]) & (max(psup[,j+1]) > upper)
-    if (condition_A | sum(prand>0) <= 1  | length(y) >= maxN) break
+    if (((condition_A | sum(prand>0) <= 1  | length(y) >= maxN)) & length(y)>=burn) break
     #if (sum(prand>0) <= 1  | max(psup[,j+1]) > upper | length(y) >= maxN) break
   }
   if (conjugate_prior == T) {
@@ -600,14 +603,15 @@ RAR_sim = function(nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000, upper
 
 sim_wrapper = function(i, nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000, upper = 0.975, uppfut = 0.95, lower = .05,
                        burn = 10*nt, response.type, conjugate_prior = T, padhere = rep(0.95,nt), adapt = T,
-                       platf = T, compCon = F, MID = 0) {
+                       platf = T, fixed = F, addlast = Inf, compCon = F, MID = 0) {
   if (good.out == F) {
     if (response.type == 'absolute') theta0 = - theta0
     if (response.type == 'rate') theta0 = 1 - theta0
   }
   ng = nb
   addarmlater = rep(0, nt)
-  if (platf == T) addarmlater[nt] = Inf
+  if (platf == T) 
+    if (fixed == T) addarmlater[nt] = addlast else addarmlater[nt] = Inf
   j = 0
   x = array(0, dim = c(nt, 1))
   x0 = array(0, dim = c(nt, 1))
@@ -696,7 +700,7 @@ sim_wrapper = function(i, nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000
       if (length(ll[addarmlater[ll]<j]) != 0) {
         fut.stop = c(fut.stop, ll[addarmlater[ll]<j])
       }
-      if (platf == T & addarmlater[nt] == Inf) {
+      if (platf == T & fixed == F & addarmlater[nt] == Inf) {
         if (max(psup[,j+1]) > upper) {
           s = which.max(psup[,j+1])
           addarmlater[nt] = j
@@ -742,7 +746,7 @@ sim_wrapper = function(i, nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000
         fut.stop = c(fut.stop, ff[addarmlater[ff]<j])
         
       }
-      if (platf == T & addarmlater[nt] == Inf) {
+      if (platf == T & fixed == F & addarmlater[nt] == Inf) {
         
         if (!is.null(fut.stop)) {
           psup[fut.stop,j+1] = 0
@@ -757,10 +761,10 @@ sim_wrapper = function(i, nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000
       prand[which(addarmlater<=j & psup[,j+1]>0)] = 1
       prand[1] = 1
       prand[which(addarmlater==j)] = 1
-      prand[which(pfut > uppfut)] = 0
+      if (length(y)>=burn) prand[which(pfut > uppfut)] = 0
     }
     condition_A = (platf == F | nt > 3 | j>addarmlater[nt]) & (max(psup[,j+1]) > upper)
-    if (condition_A | sum(prand>0) <= 1  | length(y) >= maxN) break
+    if (((condition_A | sum(prand>0) <= 1  | length(y) >= maxN)) & length(y)>=burn) break 
   }
   psup_last = psup[,j+1]
   pbin = ifelse(psup_last > upper, 1, 0)
@@ -787,10 +791,10 @@ sim_wrapper = function(i, nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000
 #' @export
 power_compute = function(nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000, upper = 0.975, uppfut = 0.95, lower = .05,
                          burn = 10*nt, response.type, conjugate_prior = T, padhere = rep(0.95,nt), adapt = T,
-                         platf = T, compCon = F, MID = 0, M = 100) {
+                         platf = T, fixed = F, addlast = Inf, compCon = F, MID = 0, M = 100) {
   df = data.frame(t(sapply(1:M, sim_wrapper, nt, theta0 = theta0, good.out = good.out, nb = nb, maxN = maxN, N = N, upper = upper, uppfut = uppfut, lower = lower,
-                           burn = burn, response.type, conjugate_prior = conjugate_prior, padhere = padhere, adapt = adapt,
-                           platf = platf, compCon = compCon, MID = MID, simplify = T)))
+                           burn = burn, response.type = response.type, conjugate_prior = conjugate_prior, padhere = padhere, adapt = adapt,
+                           platf = platf, fixed = fixed, addlast = addlast, compCon = compCon, MID = MID, simplify = T)))
   if (compCon == T) {
     power = apply(do.call(rbind, df$power), 2, mean)
     pfut = apply(do.call(rbind, df$pfut), 2, mean)
@@ -811,12 +815,12 @@ power_compute = function(nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000,
 #' @export
 alpha_compute = function(nt, theta0, good.out = T, nb = 1, maxN = 500, N = 1000, upper = 0.975, uppfut = 0.95, lower = .05,
                          burn = 10*nt, response.type, conjugate_prior = T, padhere = rep(0.95,nt), adapt = T,
-                         platf = T, compCon = F, MID = 0, M = 100) {
+                         platf = T, fixed = F, addlast = Inf, compCon = F, MID = 0, M = 100) {
   if (response.type == 'absolute' | response.type == 'count') theta0 = rep(0, nt)
   if (response.type == 'rate') theta0 = rep(mean(theta0), nt)
   df = data.frame(t(sapply(1:M, sim_wrapper, nt, theta0 = theta0, good.out = good.out, nb = nb, maxN = maxN, N = N, upper = upper, uppfut = uppfut, lower = lower,
                            burn = burn, response.type, conjugate_prior = conjugate_prior, padhere = padhere, adapt = adapt,
-                           platf = platf, compCon = compCon, MID = MID, simplify = T)))
+                           platf = platf, fixed = fixed, addlast = addlast, compCon = compCon, MID = MID, simplify = T)))
   if (compCon == T) alpha = apply(do.call(rbind, df$power), 2, mean) else alpha = mean(unlist(df$alpha))
   out = list(alpha = alpha)
   return(out)

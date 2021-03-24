@@ -89,10 +89,18 @@ shinyServer(function(input, output, session) {
         upthreshold <- input$upthreshF
       }
       
+      if (input$platf == "TRUE") {
+        fixed0 = input$fixed
+        if (input$fixed == F) addlast0 = Inf else addlast0 = input$addlast
+      } else {
+        fixed0 = F
+        addlast0 = Inf
+      }  
+      
       RAR_sim(nt = input$nt, theta0 = eff, good.out = input$goodout, nb = input$batchsize, maxN = input$max, N = 1000,
               upper = upthreshold, uppfut = input$uppfut, lower = input$lowthresh,
               burn = input$burnin, response.type = input$efftype, conjugate_prior = T, padhere = adh, adapt = adp,
-              platf = input$platf, compCon = input$compCon, MID = mid)
+              platf = input$platf, fixed = fixed0, addlast = addlast0, compCon = input$compCon, MID = mid)
     } else {
       createAlert(session, "alert0", "Alert0", title = "Invalid Entry",
                   content = "Proportions must be between 0 and 1.", append = FALSE)
@@ -118,7 +126,6 @@ shinyServer(function(input, output, session) {
   })
   
   power_alpha_calc = eventReactive(input$button2, {
-
     adh0 = paste('adh', 1:input$nt, sep = '')
     adh = c()
     for (i in 1:input$nt) adh[i] = as.numeric(input[[adh0[i]]])
@@ -134,6 +141,14 @@ shinyServer(function(input, output, session) {
       upthreshold <- input$upthreshF
     }
     
+    if (input$platf == "TRUE") {
+      fixed0 = input$fixed
+      if (input$fixed == F) addlast0 = Inf else addlast0 = input$addlast
+    } else {
+      fixed0 = F
+      addlast0 = Inf
+    }
+    
     withProgress(message = 'Estimating power and type I error', value = 0, max = 4*input$M, {
     
     power_out <- withTimeout({power_compute(nt = input$nt, theta0 = eff, good.out = input$goodout,
@@ -141,7 +156,8 @@ shinyServer(function(input, output, session) {
                                upper = upthreshold, uppfut = input$uppfut, lower = input$lowthresh,
                                burn = input$burnin, response.type = input$efftype, 
                                conjugate_prior = T, padhere = adh, adapt = adp,
-                               platf = input$platf, compCon = input$compCon, MID = mid, M = input$M)},
+                               platf = input$platf, fixed = fixed0, addlast = addlast0, 
+                               compCon = input$compCon, MID = mid, M = input$M)},
                 timeout = ifelse(!is.null(input$Tpower), input$Tpower, Inf), onTimeout = 'silent')
     
     alpha_out <- withTimeout({alpha_compute(nt = input$nt, theta0 = eff, good.out = input$goodout,
@@ -149,7 +165,8 @@ shinyServer(function(input, output, session) {
                                             upper = upthreshold, uppfut = input$uppfut, lower = input$lowthresh,
                                             burn = input$burnin, response.type = input$efftype, 
                                             conjugate_prior = T, padhere = adh, adapt = adp,
-                                            platf = input$platf, compCon = input$compCon, MID = mid,
+                                            platf = input$platf, fixed = fixed0, addlast = addlast0, 
+                                            compCon = input$compCon, MID = mid,
                                M = input$M)},
                 timeout = ifelse(!is.null(input$Tpower), input$Tpower, 1000000), onTimeout = 'silent')
     
@@ -714,7 +731,7 @@ shinyServer(function(input, output, session) {
     else {
       d0 = as.data.frame(p0$Nt)
       names(d0) = 'sample.size'
-      ggplot(d0, aes(x = sample.size)) + geom_histogram(fill = '#33FFFF', alpha = .5, color = 'grey') +
+      ggplot(d0, aes(x = sample.size)) + geom_histogram(fill = 'darkblue', alpha = .7, color = 'grey') +
         xlab("sample size") +
         theme(axis.text=element_text(size=12),
               axis.title=element_text(size=14,face="bold"),

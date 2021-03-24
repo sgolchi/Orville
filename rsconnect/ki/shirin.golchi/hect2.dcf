@@ -5,8 +5,8 @@ account: shirin.golchi
 server: ki
 hostUrl: https://rstudio.studyexplorer.io/__api__
 appId: 20
-bundleId: 66
+bundleId: 99
 url: https://rstudio.studyexplorer.io/content/20/
-when: 1539282095.79756
+when: 1554403174.24718
 asMultiple: FALSE
 asStatic: FALSE

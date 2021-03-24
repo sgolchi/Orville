@@ -12,7 +12,7 @@ names0 <- c('nTreatment', paste('effect', 1:5, sep = ''), 'effectType',
 shinyUI(fluidPage(#theme="bootstrap.css",
 
   # Application title
-  titlePanel(title=div(img(src="43186754.png", width = 150), "HECT - Highly Efficient Clinical Trial simulator")),
+  titlePanel(title=div(img(src="orville.png", width = 200), "A Bayesian Adaptive Clinical Trial Simulator")),
   # navbarPage('',
   #                  dashboardPage(
   #                    dbHeader,
@@ -48,8 +48,25 @@ shinyUI(fluidPage(#theme="bootstrap.css",
                  ),
                  
                  checkboxInput("platf", "Platform design", value = FALSE),
-                 bsTooltip("platf", "When this box is checked the trial starts without the last arm. The last arm is added when at least one arm is dropped.",
+                 bsTooltip("platf", "When this box is checked the trial starts without the last arm. The user specifies if the last arm is added at a pre-determined interim look or when at least one arm is dropped.",
                            "right", options = list(container = "body")),
+                 conditionalPanel(
+                   condition = "input.platf == true",
+                   radioButtons("fixed", "Approach",
+                                c("Pre-determined" = "TRUE",
+                                  #"OR" = "OR",
+                                  "Adaptive" = "FALSE"),
+                                selected = "FALSE"),
+                   bsTooltip("fixed", "Please specify if the last arm is added at a pre-determined interim look or when at least one arm is dropped.",
+                             "right", options = list(container = "body")),
+                   conditionalPanel(
+                     condition = "input.fixed == 'TRUE'",
+                     numericInput("addlast", "Interim look:", value = 1, min = 1),
+                     bsTooltip("addlast", "The interim look at which the last arm is added.",
+                               "right", options = list(container = "body"))
+
+                   )
+                 ),
                  
                  radioButtons("compCon", "Comparison:",
                               choices = c("Compare all arms simultaneously" = 'FALSE',
@@ -281,37 +298,37 @@ shinyUI(fluidPage(#theme="bootstrap.css",
                )
              )
     ),
-    tabPanel("Sample Size Calculation",
-             sidebarLayout(
-               sidebarPanel(
-
-                 div(style="display: inline-block;vertical-align:top; ", numericInput("ntss", "Number of treatments:",
-                                                                                      value = 3)),
-                 div(style="", radioButtons("efftypess", "Primary outcome type", c('Continuous' = "absolute",
-                                                                            #"OR" = "OR",
-                                                                            "Proportion (between 0 and 1)" = "rate"),
-                                            selected = "absolute")),
-                 div(style="display: inline-block;vertical-align:top; ", uiOutput("effboxesss")),
-                 div(style="display: inline-block;vertical-align:top; ", uiOutput("varboxesss")),
-                 div(style="", sliderInput("power", "Required power:",
-                                                                                      min = 0, max = 1, value = 0.80)),
-                 div(style="", sliderInput("alpha", "Required type I error rate:",
-                                                                                      min = 0, max = 1, value = 0.05)),
-                 div(style="", sliderInput("dropout", "Drop-out rate:",
-                                                                                      min = 0, max = 1, value = 0.2))
-
-               ),
-               mainPanel(
-                 br(),
-                 actionButton("button1", "Calculate", style="padding:4px; font-size:100%;
-                                  color:#FFF; background-color: #0095ff; border-color:#07c"),
-                 bsAlert('alertss'),
-                 htmlOutput('ss')
-
-               )
-             )
-    ),
-    tabPanel("User Manual",
+    # tabPanel("Sample Size Calculation",
+    #          sidebarLayout(
+    #            sidebarPanel(
+    # 
+    #              div(style="display: inline-block;vertical-align:top; ", numericInput("ntss", "Number of treatments:",
+    #                                                                                   value = 3)),
+    #              div(style="", radioButtons("efftypess", "Primary outcome type", c('Continuous' = "absolute",
+    #                                                                         #"OR" = "OR",
+    #                                                                         "Proportion (between 0 and 1)" = "rate"),
+    #                                         selected = "absolute")),
+    #              div(style="display: inline-block;vertical-align:top; ", uiOutput("effboxesss")),
+    #              div(style="display: inline-block;vertical-align:top; ", uiOutput("varboxesss")),
+    #              div(style="", sliderInput("power", "Required power:",
+    #                                                                                   min = 0, max = 1, value = 0.80)),
+    #              div(style="", sliderInput("alpha", "Required type I error rate:",
+    #                                                                                   min = 0, max = 1, value = 0.05)),
+    #              div(style="", sliderInput("dropout", "Drop-out rate:",
+    #                                                                                   min = 0, max = 1, value = 0.2))
+    # 
+    #            ),
+    #            mainPanel(
+    #              br(),
+    #              actionButton("button1", "Calculate", style="padding:4px; font-size:100%;
+    #                               color:#FFF; background-color: #0095ff; border-color:#07c"),
+    #              bsAlert('alertss'),
+    #              htmlOutput('ss')
+    # 
+    #            )
+    #          )
+    # ),
+    tabPanel("About Orville",
              fluidRow(uiOutput('about'))
 
     )
